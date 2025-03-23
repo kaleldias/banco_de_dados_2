@@ -1,0 +1,9 @@
+CREATE TABLE aluno(
+	id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+	nome VARCHAR(50),
+	nota INT
+);
+
+INSERT INTO aluno(nome, nota)
+VALUES
+	('Ana', )
