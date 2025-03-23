@@ -1,3 +1,5 @@
+-- PL/pgSQL -> Postgres Procedural Language
+
 CREATE TABLE log_calculadora(
 	id BIGINT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
 	x NUMERIC, 
@@ -7,7 +9,6 @@ CREATE TABLE log_calculadora(
 );
 
 
--- PL/pgSQL -> Postgres Procedural Language
 CREATE OR REPLACE FUNCTION calculadora(
 	v_x NUMERIC, 
 	v_y NUMERIC,
