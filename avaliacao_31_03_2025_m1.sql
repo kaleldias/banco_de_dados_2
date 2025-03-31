@@ -131,6 +131,43 @@ $$;
 CALL relatorio_nascimentos(8, 2023);
 SELECT * from relatorio_temp;
 
+
 -- Questão 3.2
 
+CREATE OR REPLACE PROCEDURE inserir_registro_nascimento(
+	p_nome VARCHAR,
+	p_data_nascimento DATE,
+	p_peso DECIMAL,
+	p_altura INT,
+	p_id_mae INT,
+	p_crm_medico VARCHAR
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+	v_id_medico INT;
+BEGIN
+	IF NOT EXISTS (SELECT 1 FROM mae WHERE id = p_id_mae) THEN
+		RAISE EXCEPTION 'Erro: Mãe com ID % não encontrada.', p_id_mae;
+	END IF;
 
+	SELECT id INTO v_id_medico
+	FROM medico
+	WHERE crm = p_crm_medico AND status = 1;
+
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'Erro: Médico com CRM % não encontrado ou está inativo.', p_crm_medico;
+	END IF;
+
+	
+	INSERT INTO nascimento (nome, data_nascimento, peso, altura, id_mae, id_medico)
+	VALUES (p_nome, p_data_nascimento, p_peso, p_altura, p_id_mae, v_id_medico);
+
+	RAISE NOTICE 'Nascimento registrado com sucesso.';
+END
+$$;
+
+
+CALL inserir_registro_nascimento('Jonas Sauro', '1998-05-28', 3.75, 65, 0, '12345-SC');
+
+SELECT * FROM medico;
