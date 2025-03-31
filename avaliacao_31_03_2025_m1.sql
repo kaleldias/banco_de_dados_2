@@ -54,4 +54,78 @@ CREATE TABLE agendamento(
 	CONSTRAINT fk_id_nascimento FOREIGN KEY (id_nascimento) REFERENCES nascimento(id)
 );
 
+
+
 -- Questão 2:
+
+-- Inserções na tabela cidae
+INSERT INTO cidade(nome, uf)
+VALUES
+	('Balneário Camboriú', 'SC'),
+	('Florianópolis', 'SC'),
+	('Curitiba', 'PR'),
+	('Porto Alegre', 'RS'),
+	('São Paulo', 'SP');
+
+-- Inserções na tabela mae
+INSERT INTO mae (id_cidade, nome, celular) VALUES
+(1, 'Maria da Silva', '(48) 99999-1111'),
+(2, 'Joana Pereira', '(47) 98888-2222'),
+(3, 'Ana Souza', '(41) 97777-3333'),
+(4, 'Carla Dias', '(51) 96666-4444'),
+(5, 'Fernanda Costa', '(11) 95555-5555');
+
+-- Inserções na tabela medico
+INSERT INTO medico (id_cidade, crm, nome, celular, salario, status) VALUES
+(1, '12345-SC', 'Dr. Pedro Almeida', '(48) 99999-6666', 12000.00, 1),
+(2, '23456-SC', 'Dra. Luana Ribeiro', '(47) 98888-7777', 10500.00, 1),
+(3, '34567-PR', 'Dr. Marcos Lima', '(41) 97777-8888', 11300.00, 0),
+(4, '45678-RS', 'Dra. Camila Torres', '(51) 96666-9999', 9800.00, 1),
+(5, '56789-SP', 'Dr. Rafael Moreira', '(11) 95555-0000', 13200.00, 1);
+
+-- Inserções na tabela nascimento
+INSERT INTO nascimento (id_mae, id_medico, nome, data_nascimento, peso, altura) VALUES
+(1, 1, 'Lucas Silva', '2023-08-15', 3.215, 49),
+(2, 2, 'Beatriz Pereira', '2024-01-10', 2.980, 47),
+(3, 3, 'Felipe Souza', '2022-11-03', 3.120, 48),
+(4, 4, 'Julia Dias', '2023-03-21', 3.050, 50),
+(5, 5, 'Rafael Costa', '2023-07-28', 3.410, 50);
+
+-- Inserções na tabela agendamento
+INSERT INTO agendamento (id_nascimento, inicio, fim) VALUES
+(1, '2025-04-01 08:00:00', '2025-04-01 09:00:00'),
+(2, '2025-04-01 09:30:00', '2025-04-01 10:30:00'),
+(3, '2025-04-01 11:00:00', '2025-04-01 12:00:00'),
+(4, '2025-04-02 08:00:00', '2025-04-02 09:00:00'),
+(5, '2025-04-02 09:30:00', '2025-04-02 10:30:00');
+
+
+-- Questão 3.1
+
+CREATE OR REPLACE PROCEDURE relatorio_nascimentos(
+	p_mes INT,
+	p_ano INT
+)
+LANGUAGE SQL
+AS $$
+	DROP TABLE IF EXISTS relatorio_temp;
+	CREATE TEMP TABLE relatorio_temp AS
+	SELECT
+		m.nome,
+		COUNT(n.id) AS total_nascimentos
+	FROM medico AS m
+	JOIN nascimento AS n
+		ON m.id = n.id_medico
+	WHERE 
+		EXTRACT(MONTH FROM n.data_nascimento) = p_mes
+		AND 
+		EXTRACT(YEAR FROM n.data_nascimento) = p_ano
+	GROUP BY 
+		m.nome
+	ORDER BY
+		total_nascimentos DESC,
+		m.nome ASC
+$$;
+
+CALL relatorio_nascimentos(8, 2023);
+SELECT * from relatorio_temp;
