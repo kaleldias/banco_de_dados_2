@@ -22,7 +22,7 @@ BEGIN
 		WHEN '+' THEN
 			v_resultado := v_x + v_y;
 		WHEN '-' THEN
-			v_resultado := v_x - v.y;
+			v_resultado := v_x - v_y;
 		WHEN '*' THEN
 			v_resultado := v_x * v_y;
 		WHEN '/' THEN
@@ -44,7 +44,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-SELECT calculadora(305, 39, '*');
+SELECT calculadora(305, 3, '*');
 SELECT * FROM log_calculadora;
 
 ALTER TABLE log_calculadora
