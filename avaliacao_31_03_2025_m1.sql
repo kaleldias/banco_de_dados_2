@@ -9,6 +9,12 @@ CREATE SCHEMA IF NOT EXISTS maternidade;
 
 SET search_path TO maternidade;
 
+CREATE TABLE cidade(
+	id SERIAL PRIMARY KEY,
+	nome VARCHAR(100) NOT NULL,
+	uf CHAR(2) NOT NULL
+);
+
 CREATE TABLE mae(
 	id SERIAL PRIMARY KEY,
 	id_cidade INT NOT NULL,
@@ -17,11 +23,6 @@ CREATE TABLE mae(
 	CONSTRAINT fk_id_cidade FOREIGN KEY (id_cidade) REFERENCES cidade(id)
 );
 
-CREATE TABLE cidade(
-	id SERIAL PRIMARY KEY,
-	nome VARCHAR(100) NOT NULL,
-	uf CHAR(2) NOT NULL
-);
 
 CREATE TABLE medico(
 	id SERIAL PRIMARY KEY,
@@ -129,3 +130,7 @@ $$;
 
 CALL relatorio_nascimentos(8, 2023);
 SELECT * from relatorio_temp;
+
+-- Questão 3.2
+
+
