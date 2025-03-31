@@ -170,4 +170,4 @@ $$;
 
 CALL inserir_registro_nascimento('Jonas Sauro', '1998-05-28', 3.75, 65, 0, '12345-SC');
 
-SELECT * FROM medico;
+
