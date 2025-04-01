@@ -168,6 +168,60 @@ END
 $$;
 
 
-CALL inserir_registro_nascimento('Jonas Sauro', '1998-05-28', 3.75, 65, 0, '12345-SC');
+CALL inserir_registro_nascimento('Jonas Segundo', '1998-05-28', 3.75, 65, 5, '2-SC');
 
 
+-- Quetão 3.3
+
+CREATE OR REPLACE PROCEDURE salario_liquido_medico(
+	p_crm_medico VARCHAR,
+	p_mes INT,
+	p_ano INT,
+	OUT salario_liquido NUMERIC
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+	total_nascimentos INT;
+	v_id_medico INT;
+	v_id_cidade_medico INT;
+	v_salario_fixo NUMERIC;
+	v_nasc_outra_cidade INT;
+	
+BEGIN
+	SELECT id, id_cidade, salario
+	INTO v_id_medico, v_id_cidade_medico, v_salario_fixo
+	FROM medico
+	WHERE crm = p_crm_medico AND status = 1;
+		
+	IF NOT FOUND THEN
+		RAISE EXCEPTION 'Erro: O CRM "%" é inválido ou esta inativo!', p_crm_medico;
+	END IF;
+
+	SELECT 
+		COUNT(id) 
+	INTO total_nascimentos
+	FROM nascimento
+	WHERE id_medico = v_id_medico
+		AND EXTRACT(MONTH FROM data_nascimento) = p_mes
+		AND EXTRACT (YEAR FROM data_nascimento) = p_ano;
+		
+	SELECT COUNT(n.id) 
+	INTO v_nasc_outra_cidade
+	FROM nascimento AS n
+	JOIN mae AS m
+		ON n.id_mae = m.id
+	WHERE n.id_medico = v_id_medico
+		AND EXTRACT(MONTH FROM data_nascimento) = p_mes
+		AND EXTRACT(YEAR FROM data_nascimento) = p_ano
+		AND m.id_cidade <> v_id_cidade_medico;
+
+	salario_liquido := v_salario_fixo + (3500 * total_nascimentos) - (1000 * v_nasc_outra_cidade);
+
+	RAISE NOTICE 'Salário líquido do médico: R$ %', salario_liquido;
+	
+END;
+$$;
+
+
+CALL salario_liquido_medico('23456-SC', 3, 2023, NULL);
