@@ -290,8 +290,6 @@ FOR EACH ROW
 EXECUTE FUNCTION validar_nascimento_nao_nulo();
 
 
-
-
 -- Cidades
 INSERT INTO cidade (nome, uf) VALUES ('Floripa', 'SC');
 
@@ -306,3 +304,60 @@ INSERT INTO nascimento (
 ) VALUES (
     1, 1, 'Bebê Teste', '2025-03-01', 3.200, 49
 );
+
+
+
+
+
+
+-- Questão 4.3
+CREATE OR REPLACE FUNCTION validar_horario_agendamento()
+RETURNS TRIGGER AS $$
+DECLARE
+    hora_inicio TIME := CAST(NEW.inicio AS TIME);
+    hora_fim TIME := CAST(NEW.fim AS TIME);
+    dia_semana INT := EXTRACT(DOW FROM NEW.inicio);
+BEGIN
+    -- Verifica se é sábado (6) ou domingo (0)
+    IF dia_semana = 0 OR dia_semana = 6 THEN
+        RAISE EXCEPTION 'Erro: Agendamentos não são permitidos aos sábados ou domingos.';
+    END IF;
+
+    -- Verifica se início está fora do expediente
+    IF hora_inicio < TIME '08:00' 
+        OR (hora_inicio >= TIME '12:00' AND hora_inicio < TIME '13:30')
+        OR hora_inicio >= TIME '17:30' THEN
+        RAISE EXCEPTION 'Erro: Horário de início fora do expediente.';
+    END IF;
+
+    -- Verifica se ultrapassa o almoço
+    IF hora_inicio < TIME '12:00' AND hora_fim > TIME '12:00' THEN
+        RAISE EXCEPTION 'Erro: Agendamento da manhã ultrapassa meio-dia.';
+    END IF;
+
+    -- Verifica se ultrapassa o final do expediente
+    IF hora_inicio >= TIME '13:30' AND hora_fim > TIME '17:30' THEN
+        RAISE EXCEPTION 'Erro: Agendamento da tarde ultrapassa o final do expediente.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER trg_validar_agendamento
+BEFORE INSERT OR UPDATE ON agendamento
+FOR EACH ROW
+EXECUTE FUNCTION validar_horario_agendamento();
+
+
+-- Inserção Válida
+INSERT INTO agendamento (id_nascimento, inicio, fim)
+VALUES (1, '2025-04-03 09:00:00', '2025-04-03 10:00:00');
+
+-- Inserção Inválida
+INSERT INTO agendamento (id_nascimento, inicio, fim)
+VALUES (1, '2025-04-06 09:00:00', '2025-04-06 10:00:00');
+
+
+SELECT * FROM agendamento;
