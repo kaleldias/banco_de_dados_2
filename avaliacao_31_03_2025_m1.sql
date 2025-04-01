@@ -258,25 +258,51 @@ VALUES (1, 3, 'Ana', '2025-04-01', 3.2, 48);
 
 
 
-
 -- Questao 4.2
-CREATE OR REPLACE FUNCTION validar_campos_nascimento()
-RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION validar_nascimento_nao_nulo()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
 BEGIN
     IF NEW.nome IS NULL THEN
-        RAISE EXCEPTION 'Nome não pode ser nulo';
-    ELSIF NEW.data_nascimento IS NULL THEN
-        RAISE EXCEPTION 'Data de nascimento não pode ser nula';
-    ELSIF NEW.peso IS NULL THEN
-        RAISE EXCEPTION 'Peso não pode ser nulo';
-    ELSIF NEW.altura IS NULL THEN
-        RAISE EXCEPTION 'Altura não pode ser nula';
+        RAISE EXCEPTION 'Erro: O nome do bebê não pode ser nulo.';
     END IF;
+
+    IF NEW.data_nascimento IS NULL THEN
+        RAISE EXCEPTION 'Erro: A data de nascimento não pode ser nula.';
+    END IF;
+
+    IF NEW.peso IS NULL THEN
+        RAISE EXCEPTION 'Erro: O peso do bebê não pode ser nulo.';
+    END IF;
+
+    IF NEW.altura IS NULL THEN
+        RAISE EXCEPTION 'Erro: A altura do bebê não pode ser nula.';
+    END IF;
+
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
-CREATE TRIGGER trg_validar_nascimento_update
+CREATE TRIGGER gatilho_valida_nascimento
 BEFORE UPDATE ON nascimento
 FOR EACH ROW
-EXECUTE FUNCTION validar_campos_nascimento();
+EXECUTE FUNCTION validar_nascimento_nao_nulo();
+
+
+
+
+-- Cidades
+INSERT INTO cidade (nome, uf) VALUES ('Floripa', 'SC');
+
+-- Mãe e médico
+INSERT INTO mae (id_cidade, nome, celular) VALUES (1, 'Maria Teste', '(48) 99999-1234');
+INSERT INTO medico (id_cidade, crm, nome, celular, salario, status) 
+VALUES (1, 'CRM9999', 'Dr. Teste', '(48) 99999-9999', 10000, 1);
+
+-- Nascimento válido
+INSERT INTO nascimento (
+    id_mae, id_medico, nome, data_nascimento, peso, altura
+) VALUES (
+    1, 1, 'Bebê Teste', '2025-03-01', 3.200, 49
+);
