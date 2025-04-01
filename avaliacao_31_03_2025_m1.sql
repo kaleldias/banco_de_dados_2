@@ -1,6 +1,7 @@
 /*
 	Avaliação Banco de Dados II [M1]
 	Professor: Maurício Pasetto
+	Equipe: Kal-EL Dias, Arthur Felix, Felipe Galkowski
 */
 
 -- Questão 1:
